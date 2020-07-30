@@ -423,6 +423,7 @@ public:
 	 *
 	 * @return The density
 	 */
+
 	virtual double getDensity() const = 0;
 
 	/**
@@ -480,6 +481,10 @@ public:
 	 * @return The number of xenon per fission
 	 */
 	virtual double getFissionYield() const = 0;
+
+	virtual double getInterfaceE() const = 0;
+
+	virtual double getXeSolubility() const = 0;
 
 	/**
 	 * Obtain the value of the migration energy threshold for effective diffusivity.

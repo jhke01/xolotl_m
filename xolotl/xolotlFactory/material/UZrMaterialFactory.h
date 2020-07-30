@@ -38,6 +38,24 @@ public:
 	/**
 	 * The destructor
 	 */
+	 void initializeMaterial(const xolotlCore::Options &options) {
+ 		// Call the mother method
+ 		MaterialFactory::initializeMaterial(options);
+
+ 		// Change the flux amplitude because we have to take into account
+ 		// that there are one xenon created every 4 fissions.
+ 		theFluxHandler->setFluxAmplitude(
+ 				options.getFluxAmplitude() * options.getFissionYield());
+
+ 		// Pass the fission yield to the re-solution and heterogenenous nucletation handlers
+ 		theReSolutionHandler->setFissionYield(options.getFissionYield());
+ 		theNucleationHandler->setFissionYield(options.getFissionYield());
+
+ 		return;
+ 	}
+
+
+
 	~UZrMaterialFactory() {
 	}
 };

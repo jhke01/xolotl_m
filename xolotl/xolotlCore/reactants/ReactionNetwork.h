@@ -99,7 +99,7 @@ protected:
 		/**
 		 * Determine if the given reactant is in our set.
 		 * @param testReactant The reactant to check.
-		 * @return true iff the reactant's composition's canonical 
+		 * @return true iff the reactant's composition's canonical
 		 * representation is in our set of doomed reactants.
 		 */
 		bool operator()(const std::unique_ptr<IReactant>& testReactant) const {
@@ -177,6 +177,11 @@ protected:
 	 * The interstitial bias.
 	 */
 	double interstitialBias;
+
+	/**
+	 * The monomer concentration.
+	 */
+	double monomerConc;
 
 	/**
 	 * Are dissociations enabled?
@@ -325,7 +330,7 @@ public:
 	 *
 	 * @param species The reactant's single species.
 	 * @param size The size of the reactant.
-	 * @return A pointer to the reactant, or nullptr if it does not 
+	 * @return A pointer to the reactant, or nullptr if it does not
 	 * exist in the network.
 	 */
 	IReactant * get(Species species, IReactant::SizeType size) const override {
@@ -755,6 +760,15 @@ public:
 		return interstitialBias;
 	}
 
+	/**
+	 * This operation sets the monomer concentration
+	 *
+	 * @param conc The concentration
+	 */
+	virtual void setMonomerConc(double conc) override {
+		monomerConc = conc;
+	}
+	
 	/**
 	 * Remove the given reactants from the network.
 	 *

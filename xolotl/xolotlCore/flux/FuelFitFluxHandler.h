@@ -47,6 +47,8 @@ public:
 			std::vector<double> grid) {
 		// Set the grid
 		xGrid = grid;
+		// Call the general method
+		FluxHandler::initializeFluxHandler(network, surfacePos, grid);
 
 		// Skip if the flux amplitude is 0.0 and we are not using a time profile
 		if (equal(fluxAmplitude, 0.0) && !useTimeProfile) return;
@@ -57,6 +59,15 @@ public:
 		if (!fluxCluster) {
 			throw std::string(
 					"\nThe single xenon cluster is not present in the network, "
+							"cannot use the flux option!");
+		}
+		fluxIndices.push_back(fluxCluster->getId() - 1);
+
+		// Look for vacancies now
+		fluxCluster = network.get(Species::V, 1);
+		if (!fluxCluster) {
+			throw std::string(
+					"\nThe single vacancy cluster is not present in the network, "
 							"cannot use the flux option!");
 		}
 		fluxIndices.push_back(fluxCluster->getId() - 1);
@@ -73,9 +84,15 @@ public:
 		// Skip if no index was set
 		if (fluxIndices.size() == 0) return;
 
+		// Recompute the flux vector if a time profile is used
+		if (useTimeProfile) {
+			fluxAmplitude = getProfileAmplitude(currentTime);
+		}
+
 		// 0D Case
 		if (xGrid.size() == 0) {
 			updatedConcOffset[fluxIndices[0]] += fluxAmplitude;
+			updatedConcOffset[fluxIndices[1]] += fluxAmplitude; // add the vacancy generation rate
 			return;
 		}
 

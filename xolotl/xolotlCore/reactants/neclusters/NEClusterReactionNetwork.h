@@ -57,14 +57,20 @@ private:
 	 * @param reaction The reaction
 	 * @return The binding energy corresponding to this dissociation
 	 */
+	 /*
 	virtual double computeBindingEnergy(
 			const DissociationReaction& reaction) const override {
+		// Get the monomer concentration
 		double bindingEnergy = reaction.first.getFormationEnergy()
 				+ reaction.second.getFormationEnergy()
 				- reaction.dissociating.getFormationEnergy();
 
 		return bindingEnergy;
 	}
+  */
+	double computeBindingEnergy(const DissociationReaction& reaction) const
+			override;
+
 
 	/**
 	 * Add the dissociation connectivity for the reverse reaction if it is allowed.

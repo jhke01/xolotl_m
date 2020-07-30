@@ -16,7 +16,7 @@ void NECluster::recomputeDiffusionCoefficient(double temp, int i) {
 		diffusionCoefficient[i] = diffusionFactor;
 		return;
 	}
-
+  /**
 	// Intrinsic diffusion
 	double kernel = -3.04 / (xolotlCore::kBoltzmann * temp);
 	double D3 = 7.6e8 * exp(kernel); // nm2/s
@@ -30,8 +30,9 @@ void NECluster::recomputeDiffusionCoefficient(double temp, int i) {
 	// Radiation-enhanced diffusion
 	kernel = -1.2 / (xolotlCore::kBoltzmann * temp);
 	double D2 = (5.6e-25 * sqrt(fissionRate) * exp(kernel)) * 1.0e18; // nm2/s
-
-	diffusionCoefficient[i] = D1 + D2 + D3;
+	
+	diffusionCoefficient[i] = 1;
+	**/
 
 	return;
 }
@@ -86,7 +87,7 @@ void NECluster::resultFrom(ProductionReaction& reaction, IReactant& product) {
 
 void NECluster::resultFrom(ProductionReaction& reaction, int[4], int[4]) {
 
-	// Add a cluster pair for given reaction 
+	// Add a cluster pair for given reaction
 	reactingPairs.emplace_back(
 			reaction,  // TODO verify this is correct
 			&static_cast<NECluster&>(reaction.first),

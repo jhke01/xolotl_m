@@ -185,8 +185,13 @@ PetscErrorCode computeXenonContent0D(TS ts, PetscInt, PetscReal time,
 	network.updateConcentrationsFromArray(gridPointSolution);
 	CHKERRQ(ierr);
 
-	// Store the concentration and other values
-	double bubbleConcentration = 0.0, radii = 0.0;
+	// Get the minimum size for the radius
+	auto minSizes = solverHandler.getMinSizes();
+
+	// Store the concentration and other values over the grid
+	double bubbleConcentration = 0.0, radii = 0.0,
+			partialBubbleConcentration = 0.0, partialRadii = 0.0, partialSize =
+					0.0, Xe_Density = 0.0, Xe_Size_t = 0.0, Xe_Par_Density = 0.0, Xe_Par_Size_t = 0.0;
 
 	// Loop on all the indices
 	for (unsigned int i = 0; i < indices0D.size(); i++) {
@@ -197,6 +202,27 @@ PetscErrorCode computeXenonContent0D(TS ts, PetscInt, PetscReal time,
 		radii += conc * radii0D[i];
 	}
 
+	Xe_Par_Density = 0.0;
+	Xe_Par_Size_t = 0.0;
+	Xe_Density = 0.0;
+	Xe_Size_t = 0.0;
+
+	for (auto const &currMapItem : network.getAll(ReactantType::Xe)) {
+		// Get the cluster
+    auto const &cluster = *(currMapItem.second);
+		double Xe_conc = cluster.getConcentration();
+		Xe_Density += Xe_conc;
+		Xe_Size_t += Xe_conc * cluster.getSize();
+		if (cluster.getSize() >= minSizes[0] && Xe_conc > 1.0e-16) {
+		  Xe_Par_Density += Xe_conc;
+			Xe_Par_Size_t += Xe_conc * cluster.getSize();
+			//Xe_Par_Radius += gridPointSolution[cluster.getId() - 1] * cluster.getReactionRadius();
+		}
+	}
+
+	double Xe_Size = Xe_Size_t / Xe_Density;
+	double Xe_Par_Size = (Xe_Par_Size_t) / (Xe_Par_Density);
+
 	double xeConcentration = network.getTotalAtomConcentration();
 	double vConcentration = network.getTotalVConcentration();
 
@@ -206,14 +232,21 @@ PetscErrorCode computeXenonContent0D(TS ts, PetscInt, PetscReal time,
 	std::cout << "Vacancy concentration = " << vConcentration << std::endl
 			<< std::endl;
 
+
 	// Write more data in a file
 	std::ofstream outputFile;
 	outputFile.open("contentOut.txt", ios::app);
 	outputFile << time << " " << xeConcentration << " " << vConcentration << " "
 			<< xeConcentration / bubbleConcentration << " "
 			<< vConcentration / bubbleConcentration << " "
-			<< radii / bubbleConcentration << std::endl;
-	outputFile.close();
+			//<< bubbleConcentration << " "
+			<< Xe_Density << " "
+			<< Xe_Size << " "
+			<< Xe_Par_Density << " "
+			<< Xe_Par_Size << " "
+			//<< radii / bubbleConcentration
+			<< std::endl;
+			outputFile.close();
 
 	// Restore the solutionArray
 	ierr = DMDAVecRestoreArrayDOFRead(da, solution, &solutionArray);
@@ -308,6 +341,7 @@ PetscErrorCode computeXenonRetention0D(TS ts, PetscInt, PetscReal time,
 			(3.0 * (double) minSizes[0])
 					/ (4.0 * xolotlCore::pi * network.getDensity()),
 			(1.0 / 3.0));
+
 	if (partialBubbleConcentration < 1.e-16 || averagePartialRadius < minRadius)
 		averagePartialRadius = minRadius;
 

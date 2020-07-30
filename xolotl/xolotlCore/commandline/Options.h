@@ -270,6 +270,7 @@ protected:
 	 */
 	Array<int, 4> radiusMinSizes;
 
+
 	/**
 	 * Density of atom in a bubble in nm-3.
 	 */
@@ -314,6 +315,10 @@ protected:
 	 * Fission yield, how many xenon atoms are created per fission
 	 */
 	double fissionYield;
+
+	double InterfaceE;
+
+	double XeSolubility;
 
 	/**
 	 * Migration energy above which the diffusion will be ignored
@@ -857,6 +862,14 @@ public:
 	 */
 	virtual double getFissionYield() const override {
 		return fissionYield;
+	}
+
+	virtual double getInterfaceE() const override {
+		return InterfaceE;
+	}
+
+	virtual double getXeSolubility() const override {
+		return XeSolubility;
 	}
 
 	/**

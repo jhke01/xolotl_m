@@ -53,6 +53,8 @@ public:
 		if (size == 1)
 			reactionRadius = network.getImpurityRadius();
 
+		//cout << "jvar = " << network.getDensity() << endl;
+
 		return;
 	}
 

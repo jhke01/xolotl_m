@@ -23,6 +23,8 @@ UZrClusterReactionNetwork::UZrClusterReactionNetwork(
 double UZrClusterReactionNetwork::calculateDissociationConstant(
 		const DissociationReaction &reaction, int i) {
 
+  //auto conc = monomerConc;
+
 	// If the dissociations are not allowed
 	if (!dissociationsEnabled)
 		return 0.0;
@@ -35,13 +37,14 @@ double UZrClusterReactionNetwork::calculateDissociationConstant(
 	double kPlus = reaction.reverseReaction->kConstant[i];
 
 	// Calculate and return
-	double bindingEnergy = computeBindingEnergy(reaction);
+	double bindingEnergy = computeBindingEnergy(reaction) ;
 	double k_minus_exp = exp(
 			-1.0 * bindingEnergy / (xolotlCore::kBoltzmann * temperature));
-	double k_minus = (1.0 / atomicVolume) * kPlus * k_minus_exp;
+	double k_minus = (1.0 / atomicVolume) * kPlus * k_minus_exp  ;
 
 	return k_minus;
 }
+
 
 void UZrClusterReactionNetwork::createReactionConnectivity() {
 	// TODO: all the reactions are defined here
@@ -251,6 +254,10 @@ void UZrClusterReactionNetwork::updateConcentrationsFromArray(
 				currReactant.setConcentration(concentrations[id]);
 			});
 
+			// Set the Xe monomer concentration
+			auto singleXeCluster = get(Species::Xe, 1);
+			setMonomerConc(singleXeCluster->getConcentration());
+
 	return;
 }
 
@@ -308,16 +315,21 @@ void UZrClusterReactionNetwork::getDiagonalFill(SparseFillMap &fillMap) {
 double UZrClusterReactionNetwork::getTotalAtomConcentration(int i) {
 	// Initial declarations
 	double conc = 0.0;
-
+  //int j;
 	// Sum over all Xe clusters.
 	for (auto const &currMapItem : getAll(ReactantType::Xe)) {
-
+		//if (j == 1)
+		//{
+			//auto const &cluster = currMapItem.second;
+			//cout << "jvar = " << cluster->getConcentration() << endl;
+		//}
 		// Get the cluster and its composition
 		auto const &cluster = *(currMapItem.second);
 		double size = cluster.getSize();
 
 		// Add the concentration times the Xe content to the total xenon concentration
 		conc += cluster.getConcentration() * size;
+		//j = j + 1;
 	}
 
 	// Sum over all XeV clusters.
@@ -446,18 +458,31 @@ void UZrClusterReactionNetwork::computeAllPartials(
 	return;
 }
 
+
 double UZrClusterReactionNetwork::computeBindingEnergy(
 		const DissociationReaction &reaction) const {
 
+	// Get the monomer concentration
+	//auto conc = monomerConc;
+
 	// TODO: change to the desired formula or base it on formation energies
-	double bindingEnergy = 5.0;
+
+
+	double bindingEnergy = (reaction.first.getFormationEnergy()
+			+ reaction.second.getFormationEnergy()
+			- reaction.dissociating.getFormationEnergy());
+
+
+
+	/*
+	double bindingEnergy = 0.0;
 	if (reaction.dissociating.getType() == ReactantType::Xe
 			&& reaction.first.getType() == ReactantType::Xe) {
-		if (reaction.dissociating.getSize() == 2)
-			bindingEnergy = 0.5;
-		else
-			bindingEnergy = 1.0;
+   	double bindingEnergy = (reaction.first.getFormationEnergy()
+				+ reaction.second.getFormationEnergy()
+				- reaction.dissociating.getFormationEnergy());
 	}
+
 	if (reaction.dissociating.getType() == ReactantType::V
 			&& reaction.first.getType() == ReactantType::V) {
 		int size = reaction.dissociating.getSize();
@@ -483,6 +508,7 @@ double UZrClusterReactionNetwork::computeBindingEnergy(
 												/ (double) comp[toCompIdx(
 														Species::V)]));
 	}
+	*/
 
 //	if (bindingEnergy < -5.0)
 //	std::cout << "dissociation: " << reaction.dissociating.getName() << " -> "
@@ -490,8 +516,7 @@ double UZrClusterReactionNetwork::computeBindingEnergy(
 //			<< reaction.second.getName() << " : " << bindingEnergy
 //			<< std::endl;
 
-	return max(bindingEnergy, -5.0);
+	return bindingEnergy;
 }
 
 } // namespace xolotlCore
-

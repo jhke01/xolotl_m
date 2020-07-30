@@ -103,4 +103,3 @@ bool HeterogeneousNucleationHandler::computePartialsForHeterogeneousNucleation(
 }
 
 }/* end namespace xolotlCore */
-

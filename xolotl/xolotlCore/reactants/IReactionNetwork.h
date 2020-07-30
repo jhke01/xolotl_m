@@ -70,7 +70,7 @@ public:
 	 *
 	 * @param species The reactant's single species.
 	 * @param size The size of the reactant.
-	 * @return A pointer to the reactant, or nullptr if it does not 
+	 * @return A pointer to the reactant, or nullptr if it does not
 	 * exist in the network.
 	 */
 	virtual IReactant * get(Species species,
@@ -442,6 +442,13 @@ public:
 	 * @return The interstitial bias
 	 */
 	virtual double getInterstitialBias() const = 0;
+
+	/**
+	 * This operation sets the monomer concentration
+	 *
+	 * @param conc The concentration
+	 */
+	virtual void setMonomerConc(double conc) = 0;
 
 	/**
 	 * Dump a representation of the network to the given output stream.
